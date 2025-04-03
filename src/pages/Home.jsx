@@ -53,12 +53,12 @@ function Home() {
             {/* Floating Navbar */}
             <div 
                 ref={floatingNavRef}
-                className={`fixed top-0 left-0 right-0 bg-[#FFF1D5] z-40 shadow-md transition-all duration-300 ease-out ${
+                className={`fixed md:hidden top-0 left-0 right-0 bg-[#FFF1D5] z-40 shadow-md transition-all duration-300 ease-out ${
                     showFloatingNav && !isSidebarOpen ? 'translate-y-0' : '-translate-y-full'
                 }`}
             >
-                <div className='max-w-screen-xl mx-auto flex flex-row items-center justify-between px-8 py-3'>
-                    <h1 className='font-inspiration text-3xl text-[#210F37]'>Our Gallery</h1>
+                <div className='max-w-screen-xl mx-auto flex flex-row items-center justify-between px-8 py-5'>
+                    <h1 className='font-inspiration text-5xl text-[#210F37]'>Our Gallery</h1>
                     <button
                         onClick={toggleSidebar}
                         className='md:hidden w-8 h-8 text-[#A62C2C] focus:outline-none'
@@ -116,7 +116,7 @@ function Home() {
                     isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}
             >
-                <div className='p-6 overflow-y-auto h-full'>
+                <div className='p-6 overflow-y-auto flex flex-col h-full'>
                     <div className='flex items-center justify-between mb-6'>
                         <button
                             onClick={toggleSidebar}
@@ -138,10 +138,11 @@ function Home() {
                             />
                         ))}
                     </div>
+                    <p className='mt-auto font-thin text-xs'>My girlfriend instagram <a className='text-blue-700' href='https://www.instagram.com/naylanggr_?igsh=dDNhNXg5N2cxcDcx' target='_blank'>@naylanggr_</a></p>
                 </div>
             </div>
 
-            <h1 className='mt-auto mb-6 font-inter text-xl'>Inspired by Atama Cahya</h1>
+            <h1 className='mt-auto mb-6 font-inter text-xl'>By <a href='https://portfolio-v2-lac-gamma.vercel.app/' target='_blank'>Giveonaldo</a></h1>
         </section>
     );
 }
