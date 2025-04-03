@@ -1,23 +1,44 @@
-import React, { useEffect, useState } from 'react'
-import PhotoCard from '../components/PhotoCard'
-import StoriesCard from '../components/StoriesCard'
-import { photoCard, storiesCard } from '../assets/data'
+import React, { useState, useEffect, useRef } from 'react';
+import PhotoCard from '../components/PhotoCard';
+import StoriesCard from '../components/StoriesCard';
+import { photoCard, storiesCard } from '../assets/data';
 import { TbLayoutSidebarLeftCollapse, TbLayoutSidebarLeftExpand } from "react-icons/tb";
 
 function Home() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [showFloatingNav, setShowFloatingNav] = useState(false);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const floatingNavRef = useRef(null);
 
+    // Close floating nav when sidebar opens
     useEffect(() => {
         if (isSidebarOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-
-        return () => {
-            document.body.style.overflow = 'auto'
+            setShowFloatingNav(false);
         }
     }, [isSidebarOpen]);
+
+    // Scroll handler for floating navbar
+    useEffect(() => {
+        const handleScroll = () => {
+            if (isSidebarOpen) return; // Don't trigger during sidebar open
+            
+            const currentScrollY = window.scrollY;
+            const scrollUp = currentScrollY < lastScrollY;
+            const scrolledUpFast = (lastScrollY - currentScrollY) > 15;
+            
+            if (scrollUp && scrolledUpFast && currentScrollY > 100) {
+                setShowFloatingNav(true);
+            } 
+            else if (currentScrollY <= 100 || !scrollUp) {
+                setShowFloatingNav(false);
+            }
+            
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY, isSidebarOpen]);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -29,21 +50,50 @@ function Home() {
 
     return (
         <section className='max-w-screen-xl mx-auto flex flex-col items-center pt-5 min-h-screen md:bg-white bg-[#FFF1D5] relative'>
+            {/* Floating Navbar */}
+            <div 
+                ref={floatingNavRef}
+                className={`fixed top-0 left-0 right-0 bg-[#FFF1D5] z-40 shadow-md transition-all duration-300 ease-out ${
+                    showFloatingNav && !isSidebarOpen ? 'translate-y-0' : '-translate-y-full'
+                }`}
+            >
+                <div className='max-w-screen-xl mx-auto flex flex-row items-center justify-between px-8 py-3'>
+                    <h1 className='font-inspiration text-3xl text-[#210F37]'>Our Gallery</h1>
+                    <button
+                        onClick={toggleSidebar}
+                        className='md:hidden w-8 h-8 text-[#A62C2C] focus:outline-none'
+                        aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                    >
+                        <TbLayoutSidebarLeftCollapse className='w-full h-full' />
+                    </button>
+                </div>
+            </div>
+
+            {/* Original Navbar */}
+            <div className={`w-full transition-opacity duration-200 ${
+                showFloatingNav || isSidebarOpen ? 'opacity-0' : 'opacity-100'
+            }`}>
+                <div className='flex flex-row items-center justify-between w-full md:w-fit px-8 md:px-0'>
+                    <h1 className='font-inspiration text-5xl md:text-7xl md:mb-16 text-[#210F37]'>Our Gallery</h1>
+                    <button
+                        onClick={toggleSidebar}
+                        className='md:hidden w-8 h-8 text-[#A62C2C] focus:outline-none'
+                        aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                    >
+                        <TbLayoutSidebarLeftCollapse className='w-full h-full' />
+                    </button>
+                </div>
+            </div>
+
+            {/* Overlay */}
             <div
-                className={`fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity duration-300 md:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                className={`fixed inset-0 bg-black bg-opacity-50 z-20 transition-opacity duration-300 md:hidden ${
+                    isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
                 onClick={closeSidebar}
             />
-            <div className='flex flex-row items-center justify-between w-full md:w-fit px-8 md:px-0'>
-                <h1 className='font-inspiration text-5xl md:text-7xl md:mb-16 text-[#210F37]'>Our Gallery</h1>
-                <button
-                    onClick={toggleSidebar}
-                    className='md:hidden w-8 h-8 text-[#A62C2C] focus:outline-none'
-                    aria-label={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-                >
-                    <TbLayoutSidebarLeftCollapse className='w-full h-full' />
-                </button>
-            </div>
+
+            {/* Main Content */}
             <div className='flex md:flex-row flex-col w-full px-12 mb-10 mt-10 md:mt-0'>
                 <div className='md:grid md:grid-cols-3 flex flex-col items-center gap-10 w-full md:w-auto md:gap-12 md:border-gray-600 md:border-r-2 md:pr-12 flex-[1.8_1.8_0%]'>
                     {photoCard.map((photo) => (
@@ -59,13 +109,15 @@ function Home() {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Sidebar */}
             <div
-                className={`fixed top-0 right-0 h-full w-3/4 max-w-sm bg-[#FFF1D5] z-30 shadow-xl transform transition-transform duration-300 ease-in-out md:hidden ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`fixed top-0 right-0 h-full w-3/4 max-w-sm bg-[#FFF1D5] z-30 shadow-xl transform transition-transform duration-300 ease-in-out md:hidden ${
+                    isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
             >
                 <div className='p-6 overflow-y-auto h-full'>
                     <div className='flex items-center justify-between mb-6'>
-                        
                         <button
                             onClick={toggleSidebar}
                             className='md:hidden w-8 h-8 text-[#A62C2C] focus:outline-none'
@@ -82,15 +134,16 @@ function Home() {
                                 desc={stories.desc}
                                 image={stories.image}
                                 link={stories.link}
-                                onClick={closeSidebar} // Close sidebar when a story is clicked
+                                onClick={closeSidebar}
                             />
                         ))}
                     </div>
                 </div>
             </div>
+
             <h1 className='mt-auto mb-6 font-inter text-xl'>Inspired by Atama Cahya</h1>
         </section>
-    )
+    );
 }
 
-export default Home
+export default Home;
